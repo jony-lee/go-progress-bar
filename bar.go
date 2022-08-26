@@ -39,7 +39,7 @@ func New(total int64, opts ...Option) *Bar {
 	// 定时打印
 	ticker := time.NewTicker(bar.interval)
 	go func() {
-		for {
+		for bar.current < bar.total {
 			fmt.Print(bar.get_progress_string())
 			<-ticker.C
 		}
