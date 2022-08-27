@@ -12,6 +12,7 @@ type Bar struct {
 	total         int64         // total of task
 	current       int64         // current status of task
 	filler        string        // filler to progress bar
+	filler_size   int           // filler size to progress bar
 	filler_length int64         // filler
 	time_format   string        // time format
 	interval      time.Duration // interval to print progress
@@ -32,8 +33,8 @@ func New(total int64, opts ...func(*Bar)) *Bar {
 		opt(bar)
 	}
 	// 处理宽字符
-	char_length := unicode.GetEastAsianWidth([]rune(bar.filler)[0])
-	bar.filler_length = bar.filler_length / int64(char_length)
+	bar.filler_size = unicode.GetEastAsianWidth([]rune(bar.filler)[0])
+	bar.filler_length = bar.filler_length / int64(bar.filler_size)
 
 	// 定时打印
 	ticker := time.NewTicker(bar.interval)
@@ -108,9 +109,8 @@ func (bar *Bar) get_eta(now time.Time) string {
 func (bar *Bar) get_progress_string() string {
 	fills := bar.get_percent() * bar.filler_length / 100
 	chunks := make([]string, bar.filler_length, bar.filler_length)
-	blank_size := unicode.GetEastAsianWidth([]rune(bar.filler)[0])
-	blank := make([]byte, blank_size, blank_size)
-	for i := 0; i < blank_size; i++ {
+	blank := make([]byte, bar.filler_size, bar.filler_size)
+	for i := 0; i < bar.filler_size; i++ {
 		blank[i] = ' '
 	}
 	for i := int64(0); i < bar.filler_length; i++ {
