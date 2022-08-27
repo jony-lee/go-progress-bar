@@ -3,7 +3,7 @@ package unicode
 func GetEastAsianWidth(c rune) int {
 	code := eastAsianWidth(c)
 	switch code {
-	case "F", "W", "A":
+	case "F", "W":
 		return 2
 	default:
 		return 1
