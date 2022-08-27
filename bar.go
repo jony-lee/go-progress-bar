@@ -23,7 +23,7 @@ func New(total int64, opts ...func(*Bar)) *Bar {
 	bar := &Bar{
 		total:         total,
 		filler:        "█",
-		filler_length: 25,
+		filler_length: 26,
 		time_format:   "15:04:05", // 2006-01-02T15:04:05
 		interval:      time.Second,
 		begin:         time.Now(),
@@ -32,7 +32,7 @@ func New(total int64, opts ...func(*Bar)) *Bar {
 		opt(bar)
 	}
 	// 处理宽字符
-	char_length := unicode.GetEastAsianWidth([]rune(bar.filler)[0]) * int(len([]rune(bar.filler)))
+	char_length := unicode.GetEastAsianWidth([]rune(bar.filler)[0])
 	bar.filler_length = bar.filler_length / int64(char_length)
 
 	// 定时打印
@@ -108,7 +108,7 @@ func (bar *Bar) get_eta(now time.Time) string {
 func (bar *Bar) get_progress_string() string {
 	fills := bar.get_percent() * bar.filler_length / 100
 	chunks := make([]string, bar.filler_length, bar.filler_length)
-	blank_size := unicode.GetEastAsianWidth([]rune(bar.filler)[0]) * len([]rune(bar.filler))
+	blank_size := unicode.GetEastAsianWidth([]rune(bar.filler)[0])
 	blank := make([]byte, blank_size, blank_size)
 	for i := 0; i < blank_size; i++ {
 		blank[i] = ' '
