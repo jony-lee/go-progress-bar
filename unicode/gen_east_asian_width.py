@@ -37,7 +37,7 @@ func GetEastAsianWidth(c rune) int {{
 
 func east_asian_width(c rune) string {{
 {condition}
-return "N"
+    return "N"
 }}
 """
 

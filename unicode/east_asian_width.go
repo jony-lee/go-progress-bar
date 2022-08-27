@@ -2591,5 +2591,5 @@ func east_asian_width(c rune) string {
 	if (0xE0100 <= c && c <= 0xE01EF){return "A"}
 	if (0xF0000 <= c && c <= 0xFFFFD){return "A"}
 	if (0x100000 <= c && c <= 0x10FFFD){return "A"}
-return "N"
+    return "N"
 }

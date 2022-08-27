@@ -17,10 +17,9 @@ type Bar struct {
 	interval      time.Duration // interval to print progress
 	begin         time.Time     // start of task
 }
-type Option func(*Bar)
 
 // New 新建进度条实例
-func New(total int64, opts ...Option) *Bar {
+func New(total int64, opts ...func(*Bar)) *Bar {
 	bar := &Bar{
 		total:         total,
 		filler:        "█",
