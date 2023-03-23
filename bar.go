@@ -20,7 +20,7 @@ type Bar struct {
 }
 
 // New 新建进度条实例
-func New(total int64, opts ...func(*Bar)) *Bar {
+func New(total int64, opts ...Option) *Bar {
 	bar := &Bar{
 		total:         total,
 		filler:        "█",
@@ -54,11 +54,14 @@ func (bar *Bar) Done(i int64) {
 
 // Finish 完成最后进度条
 func (bar *Bar) Finish() {
+	bar.current = bar.total
 	fmt.Println(bar.get_progress_string())
 }
 
+type Option func(*Bar)
+
 // WithFiller 设置进度条填充字符
-func WithFiller(filler string) func(*Bar) {
+func WithFiller(filler string) Option {
 	return func(bar *Bar) {
 		if len(bar.filler) != 0 {
 			bar.filler = filler
@@ -67,7 +70,7 @@ func WithFiller(filler string) func(*Bar) {
 }
 
 // WithTimeFormat 设置进度条ETA时间格式
-func WithTimeFormat(format string) func(*Bar) {
+func WithTimeFormat(format string) Option {
 	return func(bar *Bar) {
 		if len(format) != 0 {
 			bar.time_format = format
@@ -76,7 +79,7 @@ func WithTimeFormat(format string) func(*Bar) {
 }
 
 // WithFillerLength 设置进度条显示长度
-func WithFillerLength(l int64) func(*Bar) {
+func WithFillerLength(l int64) Option {
 	return func(bar *Bar) {
 		if l > 0 {
 			bar.filler_length = l
@@ -85,7 +88,7 @@ func WithFillerLength(l int64) func(*Bar) {
 }
 
 // WithFillerLength 设置进度条显示长度
-func WithInterval(t time.Duration) func(*Bar) {
+func WithInterval(t time.Duration) Option {
 	return func(bar *Bar) {
 		bar.interval = time.Millisecond * 8
 		if t > time.Millisecond*8 { // lower than 125HZ
@@ -94,18 +97,18 @@ func WithInterval(t time.Duration) func(*Bar) {
 	}
 }
 
-//get_percent 获取进度百分比,区间0-100
+// get_percent 获取进度百分比,区间0-100
 func (bar *Bar) get_percent() int64 {
 	return bar.current * 100 / bar.total
 }
 
-//get_eta 获取eta时间
+// get_eta 获取eta时间
 func (bar *Bar) get_eta(now time.Time) string {
 	eta := (now.Unix() - bar.begin.Unix()) * 100 / (bar.get_percent() + 1)
 	return bar.begin.Add(time.Second * time.Duration(eta)).Format(bar.time_format)
 }
 
-//get_progress_string 获取打印控制台字符串
+// get_progress_string 获取打印控制台字符串
 func (bar *Bar) get_progress_string() string {
 	fills := bar.get_percent() * bar.filler_length / 100
 	chunks := make([]string, bar.filler_length, bar.filler_length)
