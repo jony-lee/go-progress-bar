@@ -87,7 +87,7 @@ func WithFillerLength(l int64) Option {
 	}
 }
 
-// WithInterval 设置进度条显示长度
+// WithInterval 设置刷新进度条的时间间隔
 func WithInterval(t time.Duration) Option {
 	return func(bar *Bar) {
 		bar.interval = time.Millisecond * 8
