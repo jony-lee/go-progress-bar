@@ -4,16 +4,13 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/jony-lee/go-progress-bar/unicode"
 )
 
 type Bar struct {
 	total        int64         // total of task
 	current      int64         // current status of task
 	filler       string        // filler to progress bar
-	fillerSize   int           // filler size to progress bar
-	fillerLength int64         // filler
+	fillerLength int64         // num of filler repetitions
 	timeFormat   string        // time format
 	interval     time.Duration // interval to print progress
 	begin        time.Time     // start of task
@@ -23,8 +20,8 @@ type Bar struct {
 func New(total int64, opts ...Option) *Bar {
 	bar := &Bar{
 		total:        total,
-		filler:       "█",
-		fillerLength: 26,
+		filler:       " >",
+		fillerLength: 25,
 		timeFormat:   "15:04:05", // 2006-01-02T15:04:05
 		interval:     time.Second,
 		begin:        time.Now(),
@@ -32,9 +29,6 @@ func New(total int64, opts ...Option) *Bar {
 	for _, opt := range opts {
 		opt(bar)
 	}
-	// 处理宽字符
-	bar.fillerSize = unicode.GetEastAsianWidth([]rune(bar.filler)[0])
-	bar.fillerLength = bar.fillerLength / int64(bar.fillerSize)
 
 	go func() {
 		// 定时打印
@@ -114,5 +108,5 @@ func (b *Bar) getProgressString() string {
 	fills := int(b.percent() * b.fillerLength / 100)
 	now := time.Now()
 	qps := b.current / (now.Unix() - b.begin.Unix() + 1)
-	return fmt.Sprintf("\r[%s]%d/%d [eta]%s [qps]%d ", strings.Repeat(b.filler, fills)+strings.Repeat(" ", int(b.fillerLength)-fills), b.current, b.total, b.eta(now), qps)
+	return fmt.Sprintf("\r[%s]%d/%d [eta]%s [qps]%d ", strings.Repeat(b.filler, fills)+strings.Repeat(" ", (int(b.fillerLength)-fills)*len([]rune(b.filler))), b.current, b.total, b.eta(now), qps)
 }

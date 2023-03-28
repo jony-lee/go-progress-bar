@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/jony-lee/go-progress-bar"
+	"MaricoHan/go-progress-bar"
 )
 
 func main() {
@@ -31,4 +31,12 @@ func main() {
 		bar.Done(1)
 	}
 	bar.Finish()
+
+	bar = progress.New(100, progress.WithFiller(">"), progress.WithInterval(time.Second/5))
+	for i := 0; i < 100; i++ {
+		time.Sleep(time.Second / 50)
+		bar.Done(1)
+	}
+	bar.Finish()
+
 }

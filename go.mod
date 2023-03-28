@@ -1,3 +1,3 @@
-module github.com/jony-lee/go-progress-bar
+module MaricoHan/go-progress-bar
 
 go 1.16
