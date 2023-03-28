@@ -64,8 +64,8 @@ func WithFiller(filler string) Option {
 	}
 }
 
-// WithTimeFormat 设置进度条ETA时间格式
-func WithTimeFormat(format string) Option {
+// WithETAFormat 设置进度条 ETA 时间格式
+func WithETAFormat(format string) Option {
 	return func(bar *Bar) {
 		if len(format) != 0 {
 			bar.timeFormat = format
