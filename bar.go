@@ -9,53 +9,54 @@ import (
 )
 
 type Bar struct {
-	total         int64         // total of task
-	current       int64         // current status of task
-	filler        string        // filler to progress bar
-	filler_size   int           // filler size to progress bar
-	filler_length int64         // filler
-	time_format   string        // time format
-	interval      time.Duration // interval to print progress
-	begin         time.Time     // start of task
+	total        int64         // total of task
+	current      int64         // current status of task
+	filler       string        // filler to progress bar
+	fillerSize   int           // filler size to progress bar
+	fillerLength int64         // filler
+	timeFormat   string        // time format
+	interval     time.Duration // interval to print progress
+	begin        time.Time     // start of task
 }
 
 // New 新建进度条实例
 func New(total int64, opts ...Option) *Bar {
 	bar := &Bar{
-		total:         total,
-		filler:        "█",
-		filler_length: 26,
-		time_format:   "15:04:05", // 2006-01-02T15:04:05
-		interval:      time.Second,
-		begin:         time.Now(),
+		total:        total,
+		filler:       "█",
+		fillerLength: 26,
+		timeFormat:   "15:04:05", // 2006-01-02T15:04:05
+		interval:     time.Second,
+		begin:        time.Now(),
 	}
 	for _, opt := range opts {
 		opt(bar)
 	}
 	// 处理宽字符
-	bar.filler_size = unicode.GetEastAsianWidth([]rune(bar.filler)[0])
-	bar.filler_length = bar.filler_length / int64(bar.filler_size)
+	bar.fillerSize = unicode.GetEastAsianWidth([]rune(bar.filler)[0])
+	bar.fillerLength = bar.fillerLength / int64(bar.fillerSize)
 
-	// 定时打印
-	ticker := time.NewTicker(bar.interval)
 	go func() {
+		// 定时打印
+		ticker := time.NewTicker(bar.interval)
 		for bar.current < bar.total {
-			fmt.Print(bar.get_progress_string())
+			fmt.Print(bar.getProgressString())
 			<-ticker.C
 		}
+		ticker.Stop()
 	}()
 	return bar
 }
 
 // Done 更新完成进度
-func (bar *Bar) Done(i int64) {
-	bar.current += i
+func (b *Bar) Done(i int64) {
+	b.current += i
 }
 
 // Finish 完成最后进度条
-func (bar *Bar) Finish() {
-	bar.current = bar.total
-	fmt.Println(bar.get_progress_string())
+func (b *Bar) Finish() {
+	b.current = b.total
+	fmt.Println(b.getProgressString())
 }
 
 type Option func(*Bar)
@@ -73,7 +74,7 @@ func WithFiller(filler string) Option {
 func WithTimeFormat(format string) Option {
 	return func(bar *Bar) {
 		if len(format) != 0 {
-			bar.time_format = format
+			bar.timeFormat = format
 		}
 	}
 }
@@ -82,7 +83,7 @@ func WithTimeFormat(format string) Option {
 func WithFillerLength(l int64) Option {
 	return func(bar *Bar) {
 		if l > 0 {
-			bar.filler_length = l
+			bar.fillerLength = l
 		}
 	}
 }
@@ -97,35 +98,21 @@ func WithInterval(t time.Duration) Option {
 	}
 }
 
-// get_percent 获取进度百分比,区间0-100
-func (bar *Bar) get_percent() int64 {
-	return bar.current * 100 / bar.total
+// percent 获取进度百分比,区间0-100
+func (b *Bar) percent() int64 {
+	return b.current * 100 / b.total
 }
 
-// get_eta 获取eta时间
-func (bar *Bar) get_eta(now time.Time) string {
-	eta := (now.Unix() - bar.begin.Unix()) * 100 / (bar.get_percent() + 1)
-	return bar.begin.Add(time.Second * time.Duration(eta)).Format(bar.time_format)
+// eta 获取eta时间
+func (b *Bar) eta(now time.Time) string {
+	eta := (now.Unix() - b.begin.Unix()) * 100 / (b.percent() + 1)
+	return b.begin.Add(time.Second * time.Duration(eta)).Format(b.timeFormat)
 }
 
-// get_progress_string 获取打印控制台字符串
-func (bar *Bar) get_progress_string() string {
-	fills := bar.get_percent() * bar.filler_length / 100
-	chunks := make([]string, bar.filler_length, bar.filler_length)
-	blank := make([]byte, bar.filler_size, bar.filler_size)
-	for i := 0; i < bar.filler_size; i++ {
-		blank[i] = ' '
-	}
-	for i := int64(0); i < bar.filler_length; i++ {
-		switch {
-		case i < fills:
-			chunks[i] = bar.filler
-		default:
-			chunks[i] = string(blank)
-		}
-	}
+// getProgressString 获取打印控制台字符串
+func (b *Bar) getProgressString() string {
+	fills := int(b.percent() * b.fillerLength / 100)
 	now := time.Now()
-	eta := bar.get_eta(now)
-	qps := bar.current / (now.Unix() - bar.begin.Unix() + 1)
-	return fmt.Sprintf("\r[%s]%d/%d [eta]%s [qps]%d ", strings.Join(chunks, ""), bar.current, bar.total, eta, qps)
+	qps := b.current / (now.Unix() - b.begin.Unix() + 1)
+	return fmt.Sprintf("\r[%s]%d/%d [eta]%s [qps]%d ", strings.Repeat(b.filler, fills)+strings.Repeat(" ", int(b.fillerLength)-fills), b.current, b.total, b.eta(now), qps)
 }
