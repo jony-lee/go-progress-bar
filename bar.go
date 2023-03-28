@@ -10,6 +10,7 @@ type Bar struct {
 	total        int64         // total of task
 	current      int64         // current status of task
 	filler       string        // filler to progress bar
+	fillerSize   int           // length displayed
 	fillerLength int64         // num of filler repetitions
 	timeFormat   string        // time format
 	interval     time.Duration // interval to print progress
@@ -28,6 +29,13 @@ func New(total int64, opts ...Option) *Bar {
 	}
 	for _, opt := range opts {
 		opt(bar)
+	}
+
+	// 适配宽字符
+	if len(bar.filler) == len([]rune(bar.filler)) {
+		bar.fillerSize = len(bar.filler)
+	} else {
+		bar.fillerSize = 2
 	}
 
 	go func() {
@@ -108,5 +116,5 @@ func (b *Bar) getProgressString() string {
 	fills := int(b.percent() * b.fillerLength / 100)
 	now := time.Now()
 	qps := b.current / (now.Unix() - b.begin.Unix() + 1)
-	return fmt.Sprintf("\r[%s]%d/%d [eta]%s [qps]%d ", strings.Repeat(b.filler, fills)+strings.Repeat(" ", (int(b.fillerLength)-fills)*len([]rune(b.filler))), b.current, b.total, b.eta(now), qps)
+	return fmt.Sprintf("\r[%s]%d/%d [eta]%s [qps]%d ", strings.Repeat(b.filler, fills)+strings.Repeat(" ", (int(b.fillerLength)-fills)*b.fillerSize), b.current, b.total, b.eta(now), qps)
 }
