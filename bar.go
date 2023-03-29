@@ -63,7 +63,7 @@ func (b *Bar) Finish() {
 
 type Option func(*Bar)
 
-// WithFiller 设置进度条填充字符
+// WithFiller 设置进度条填充字符，如果是宽字符，目前只支持单个宽字符
 func WithFiller(filler string) Option {
 	return func(bar *Bar) {
 		if len(bar.filler) != 0 {

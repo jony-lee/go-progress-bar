@@ -10,7 +10,7 @@ func main() {
 	opts := []progress.Option{
 		progress.WithInterval(time.Second / 5),
 		progress.WithETAFormat("2006-01-02 15:04:05"),
-		progress.WithFillerLength(50),
+		progress.WithFillerLength(25),
 	}
 
 	bar := progress.New(100, append(opts, progress.WithFiller("❤️"))...)
@@ -41,7 +41,7 @@ func main() {
 	}
 	bar.Finish()
 
-	bar = progress.New(100, append(opts, progress.WithFiller(">"))...)
+	bar = progress.New(100, append(opts, progress.WithFiller("-->"))...)
 	for i := 0; i < 100; i++ {
 		time.Sleep(time.Second / 50)
 		bar.Done(1)
